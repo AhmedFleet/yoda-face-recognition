@@ -29,8 +29,8 @@ def load_lottie_url(url):
         return None
 
  
-lottie_url = "https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json"
-lottie_json = load_lottie_url(lottie_url)
+lottie_url0 = "https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json"
+lottie_json = load_lottie_url(lottie_url0)
 
 lottie_url = "https://lottie.host/8b971041-2496-4886-8448-6af7b7fa87b3/6gQs13ZbJX.json"
 lottie_json = load_lottie_url(lottie_url)
@@ -101,8 +101,8 @@ st.title("🧠 YODA - AI Face Recognition Assistant")
 #========================
 
 
-if lottie_json:
-    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="main")
+if lottie_json0:
+    st_lottie(lottie_json0, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="main")
 #=======================
 tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "📊 Report", "⚙️ AI Suggestions"])
 
