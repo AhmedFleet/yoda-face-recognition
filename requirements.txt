@@ -7,5 +7,6 @@ opencv-python-headless
 torch==2.0.1
 sentence-transformers==2.2.2
 huggingface_hub==0.21.4
+streamlit-lottie
 
 
