@@ -1,4 +1,3 @@
-
 import streamlit as st
 import cv2
 import numpy as np
@@ -11,30 +10,26 @@ from streamlit_lottie import st_lottie
 import requests
 
 # ========= Load model =========
-
 model = SentenceTransformer("clip-ViT-B-32")
-model = model.to('cpu')  
+model = model.to('cpu')
 
-#================================
+# ========= Load Lottie Animations =========
 @st.cache_data
 def load_lottie_url(url):
     try:
         r = requests.get(url)
         if r.status_code != 200:
-            st.error("⚠️ Lottie URL returned an error.")
             return None
         return r.json()
-    except Exception as e:
-        st.error(f"⚠️ Failed to load animation: {e}")
+    except:
         return None
 
- 
-lottie_url0 = "https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json"
-lottie_json = load_lottie_url(lottie_url0)
-
-lottie_url = "https://lottie.host/8b971041-2496-4886-8448-6af7b7fa87b3/6gQs13ZbJX.json"
-lottie_json = load_lottie_url(lottie_url)
-
+lottie_main = load_lottie_url("https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json")
+lottie_upload = load_lottie_url("https://lottie.host/8b971041-2496-4886-8448-6af7b7fa87b3/6gQs13ZbJX.json")
+lottie_search = load_lottie_url("https://lottie.host/ea71d91f-2812-4684-8592-1c2d39486c83/E5UhOpG7DH.json")
+lottie_gallery = load_lottie_url("https://lottie.host/79f64ec9-3279-4f2a-9e99-5d6a1dbf193b/NLsESZZYgN.json")
+lottie_report = load_lottie_url("https://lottie.host/f2b89f25-2c96-4b88-bb16-f124e3369d7e/TEXS2D2V03.json")
+lottie_ai = load_lottie_url("https://lottie.host/038b7fe3-5e27-44b1-b73b-4e1765a204e5/OS1ZEPwChx.json")
 
 # ========= DB Connection =========
 def connect_db():
@@ -45,7 +40,6 @@ def connect_db():
         password="YodaAi2002",
         port=5432
     )
-
 
 # ========= Face Detection =========
 def detect_faces(image):
@@ -76,9 +70,6 @@ def describe_face():
         "🧔 Adult | 🕐 40+ | 😎 Confident"
     ])
 
-
-
-
 # ========= Streamlit Setup =========
 st.set_page_config(page_title="YODA | AI Face Recognition", layout="wide", page_icon="🧠")
 
@@ -98,12 +89,9 @@ body { background-color: #0d1117; color: white; }
 """, unsafe_allow_html=True)
 
 st.title("🧠 YODA - AI Face Recognition Assistant")
-#========================
+if lottie_main:
+    st_lottie(lottie_main, speed=1, reverse=False, loop=True, quality="high", height=300, key="main_anim")
 
-
-if lottie_json0:
-    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="main")
-#=======================
 tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "📊 Report", "⚙️ AI Suggestions"])
 
 # ========= Upload =========
@@ -116,46 +104,39 @@ with tabs[0]:
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image", use_container_width=True)
         faces = detect_faces(img)
         st.info(f"✅ {len(faces)} face(s) detected.")
-
         if faces.any():
             conn = connect_db()
             cur = conn.cursor()
             os.makedirs("stored-faces", exist_ok=True)
             new_faces = []
             descriptions = []
-
             for i, (x, y, w, h) in enumerate(faces):
                 face = img[y:y+h, x:x+w]
                 face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
                 embedding = get_embedding(face_pil)
                 vector_str = f"[{', '.join(map(str, embedding))}]"
-
                 cur.execute("SELECT picture, 1 - (embedding <=> %s::vector) AS similarity FROM pictures ORDER BY embedding <=> %s::vector LIMIT 1", (vector_str, vector_str))
                 result = cur.fetchone()
-
                 if result and result[1] >= 0.95:
                     st.warning(f"⚠️ Face {i+1} is a duplicate ({result[1]*100:.2f}%)")
                     continue
-
                 filename = f"{i}_{os.urandom(4).hex()}.jpg"
                 path = os.path.join("stored-faces", filename)
                 cv2.imwrite(path, face)
                 new_faces.append((path, filename))
                 cur.execute("INSERT INTO pictures (picture, embedding) VALUES (%s, %s)", (filename, embedding.tolist()))
                 descriptions.append((generate_comment(), describe_face()))
-
             conn.commit()
             conn.close()
-
             if new_faces:
                 st.markdown("### ✅ Recently Saved:")
                 for i, (path, name) in enumerate(new_faces):
                     col1, col2 = st.columns([1, 2])
                     col1.image(path, width=150)
                     col2.write(f"**{name}**{descriptions[i][0]}{descriptions[i][1]}")
+    if lottie_upload:
+        st_lottie(lottie_upload, height=250, key="upload_anim")
 
-if lottie_json:
-    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="upload")
 # ========= Search =========
 with tabs[1]:
     st.subheader("🔍 Upload a Face to Search")
@@ -164,7 +145,6 @@ with tabs[1]:
         file_bytes = np.asarray(bytearray(query_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
         faces = detect_faces(img)
-
         if not faces.any():
             st.error("😢 No face detected.")
         else:
@@ -173,13 +153,11 @@ with tabs[1]:
             face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
             embedding = get_embedding(face_pil)
             vector_str = f"[{', '.join(map(str, embedding))}]"
-
             conn = connect_db()
             cur = conn.cursor()
             cur.execute("SELECT picture, 1 - (embedding <=> %s::vector) AS similarity FROM pictures ORDER BY embedding <=> %s::vector LIMIT 1", (vector_str, vector_str))
             result = cur.fetchone()
             conn.close()
-
             if result:
                 name, sim = result
                 percent = sim * 100
@@ -189,6 +167,9 @@ with tabs[1]:
                 col2.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)", use_container_width=True)
             else:
                 st.error("❌ No similar faces found.")
+    if lottie_search:
+        st_lottie(lottie_search, height=250, key="search_anim")
+
 # ========= Gallery =========
 with tabs[2]:
     st.subheader("🖼️ Stored Gallery")
@@ -209,6 +190,9 @@ with tabs[2]:
         conn.close()
     else:
         st.info("📭 No faces saved.")
+    if lottie_gallery:
+        st_lottie(lottie_gallery, height=250, key="gallery_anim")
+
 # ========= Report =========
 with tabs[3]:
     st.subheader("📊 Auto Summary")
@@ -220,10 +204,12 @@ with tabs[3]:
         path = os.path.join("stored-faces", file)
         col1.image(path, width=100)
         col2.write(f"**{file}**{generate_comment()}{describe_face()}")
+    if lottie_report:
+        st_lottie(lottie_report, height=250, key="report_anim")
+
 # ========= AI Suggestions =========
 with tabs[4]:
     st.subheader("⚙️ Smart AI Suggestions")
-
     files = os.listdir("stored-faces")
     if len(files) > 100:
         st.warning("🧠 Consider archiving old faces for performance.")
@@ -231,3 +217,5 @@ with tabs[4]:
         st.success("✅ Database size is healthy.")
     st.markdown("- 📌 Use clear face images for better detection.")
     st.markdown("- 🧩 Adjust detection sensitivity if needed.")
+    if lottie_ai:
+        st_lottie(lottie_ai, height=250, key="ai_anim")
