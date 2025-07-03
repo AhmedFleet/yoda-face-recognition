@@ -10,7 +10,9 @@ import random
 
 
 # ========= Load model =========
+
 model = SentenceTransformer("clip-ViT-B-32")
+model = model.to('cpu')  
 
 # ========= DB Connection =========
 def connect_db():
