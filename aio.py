@@ -89,7 +89,7 @@ body { background-color: #0d1117; color: white; }
 
 st.title("🧠 YODA - AI Face Recognition Assistant")
 #========================
-lottie_url = "https://lottie.host/38ab0002-dd9b-49e4-afb3-feb9ad7f2b3e/a6HTQI7TW6.lottie"
+lottie_url = "https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json"
 lottie_json = load_lottie_url(lottie_url)
 
 if lottie_json:
