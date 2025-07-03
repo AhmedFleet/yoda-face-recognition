@@ -7,7 +7,8 @@ from sentence_transformers import SentenceTransformer
 import psycopg2
 import os
 import random
-
+from streamlit_lottie import st_lottie
+import requests
 
 # ========= Load model =========
 
@@ -15,11 +16,11 @@ model = SentenceTransformer("clip-ViT-B-32")
 model = model.to('cpu')  
 
 #================================
-
-
-
-
-
+def load_lottie_url(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
 
 
 
@@ -87,7 +88,13 @@ body { background-color: #0d1117; color: white; }
 """, unsafe_allow_html=True)
 
 st.title("🧠 YODA - AI Face Recognition Assistant")
+#========================
+lottie_url = "https://lottie.host/38ab0002-dd9b-49e4-afb3-feb9ad7f2b3e/a6HTQI7TW6.lottie"
+lottie_json = load_lottie_url(lottie_url)
 
+if lottie_json:
+    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300)
+#=======================
 tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "📊 Report", "⚙️ AI Suggestions"])
 
 # ========= Upload =========
