@@ -1,0 +1,8 @@
+streamlit
+opencv-python
+numpy
+Pillow
+sentence-transformers
+psycopg2-binary
+streamlit-lottie
+openai
