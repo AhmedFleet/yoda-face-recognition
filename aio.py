@@ -26,10 +26,10 @@ def load_lottie_url(url):
 
 lottie_main = load_lottie_url("https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json")
 lottie_upload = load_lottie_url("https://lottie.host/8b971041-2496-4886-8448-6af7b7fa87b3/6gQs13ZbJX.json")
-lottie_search = load_lottie_url("https://lottie.host/ea71d91f-2812-4684-8592-1c2d39486c83/E5UhOpG7DH.json")
-lottie_gallery = load_lottie_url("https://lottie.host/79f64ec9-3279-4f2a-9e99-5d6a1dbf193b/NLsESZZYgN.json")
-lottie_report = load_lottie_url("https://lottie.host/f2b89f25-2c96-4b88-bb16-f124e3369d7e/TEXS2D2V03.json")
-lottie_ai = load_lottie_url("https://lottie.host/038b7fe3-5e27-44b1-b73b-4e1765a204e5/OS1ZEPwChx.json")
+lottie_search = load_lottie_url("https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json")
+lottie_gallery = load_lottie_url("https://lottie.host/b8b4c947-d359-4de1-8ae2-cf0052a19728/c7AQ3zyNiy.json")
+lottie_report = load_lottie_url("https://lottie.host/5313703a-ea9e-44da-9e38-72f1d5e0a094/ROZ7VmTJ5W.json")
+lottie_ai = load_lottie_url("https://lottie.host/a3d2629a-7bcc-41b7-b991-cc937fd8d896/gtko6LcxIh.json")
 
 # ========= DB Connection =========
 def connect_db():
