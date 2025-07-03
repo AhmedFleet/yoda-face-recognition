@@ -155,7 +155,7 @@ with tabs[0]:
                     col2.write(f"**{name}**{descriptions[i][0]}{descriptions[i][1]}")
 
 if lottie_json:
-    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="main")
+    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="upload")
 # ========= Search =========
 with tabs[1]:
     st.subheader("🔍 Upload a Face to Search")
