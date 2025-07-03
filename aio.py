@@ -28,8 +28,12 @@ def load_lottie_url(url):
         st.error(f"⚠️ Failed to load animation: {e}")
         return None
 
+ 
+lottie_url = "https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json"
+lottie_json = load_lottie_url(lottie_url)
 
-
+lottie_url = "https://lottie.host/8b971041-2496-4886-8448-6af7b7fa87b3/6gQs13ZbJX.json"
+lottie_json = load_lottie_url(lottie_url)
 
 
 # ========= DB Connection =========
@@ -95,11 +99,10 @@ body { background-color: #0d1117; color: white; }
 
 st.title("🧠 YODA - AI Face Recognition Assistant")
 #========================
-lottie_url = "https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json"
-lottie_json = load_lottie_url(lottie_url)
+
 
 if lottie_json:
-    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300)
+    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="main")
 #=======================
 tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "📊 Report", "⚙️ AI Suggestions"])
 
@@ -150,6 +153,9 @@ with tabs[0]:
                     col1, col2 = st.columns([1, 2])
                     col1.image(path, width=150)
                     col2.write(f"**{name}**{descriptions[i][0]}{descriptions[i][1]}")
+
+if lottie_json:
+st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="main")
 # ========= Search =========
 with tabs[1]:
     st.subheader("🔍 Upload a Face to Search")
