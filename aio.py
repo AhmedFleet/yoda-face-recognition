@@ -15,12 +15,13 @@ model = SentenceTransformer("clip-ViT-B-32")
 # ========= DB Connection =========
 def connect_db():
     return psycopg2.connect(
-        host="localhost",
+        host="aws-0-eu-west-3.pooler.supabase.com",
         dbname="postgres",
-        user="postgres",
-        password="123",
+        user="postgres.urqzsanhvlahtsjjbrot",
+        password="YodaAi2002",
         port=5432
     )
+
 
 # ========= Face Detection =========
 def detect_faces(image):
