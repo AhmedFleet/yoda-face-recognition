@@ -102,7 +102,7 @@ st.title("🧠 YODA - AI Face Recognition Assistant")
 
 
 if lottie_json0:
-    st_lottie(lottie_json0, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="main")
+    st_lottie(lottie_json, speed=1, reverse=False, loop=True, quality="high", height=300 ,key="main")
 #=======================
 tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "📊 Report", "⚙️ AI Suggestions"])
 
