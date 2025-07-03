@@ -16,11 +16,17 @@ model = SentenceTransformer("clip-ViT-B-32")
 model = model.to('cpu')  
 
 #================================
-def load_lottie_url(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
+@st.cache_data
+def load_lottie_url(url):
+    try:
+        r = requests.get(url)
+        if r.status_code != 200:
+            st.error("⚠️ Lottie URL returned an error.")
+            return None
+        return r.json()
+    except Exception as e:
+        st.error(f"⚠️ Failed to load animation: {e}")
         return None
-    return r.json()
 
 
 
