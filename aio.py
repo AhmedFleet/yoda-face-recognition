@@ -14,6 +14,17 @@ import random
 model = SentenceTransformer("clip-ViT-B-32")
 model = model.to('cpu')  
 
+#================================
+
+
+
+
+
+
+
+
+
+
 # ========= DB Connection =========
 def connect_db():
     return psycopg2.connect(
