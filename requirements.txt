@@ -1,4 +1,4 @@
-torch==2.7.1
+torch==2.5.1
 torchvision==0.22.1
 sentence-transformers==2.2.2
 transformers==4.30.2
@@ -7,6 +7,6 @@ psycopg2-binary==2.9.9
 pgvector==0.2.1
 opencv-python==4.11.0.86
 Pillow==10.2.0
-streamlit-lottie==0.0.5
-requests==2.31.0
+streamlit-lottie
+requests
 os
