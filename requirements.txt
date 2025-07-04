@@ -9,4 +9,3 @@ opencv-python==4.11.0.86
 Pillow==10.2.0
 streamlit-lottie
 requests
-os
