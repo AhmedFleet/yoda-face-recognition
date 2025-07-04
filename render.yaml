@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: yoda-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run aio.py --server.port $PORT --server.enableCORS false
+    envVars:
+      - key: DB_HOST
+        value: aws-0-eu-west-3.pooler.supabase.com
+      - key: DB_NAME
+        value: postgres
+      - key: DB_USER
+        value: postgres.urqzsanhvlahtsjjbrot
+      - key: DB_PASSWORD
+        value: YodaAi2002
+
+build:
+  pythonVersion: 3.10
