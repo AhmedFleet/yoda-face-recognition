@@ -32,14 +32,17 @@ lottie_report = load_lottie_url("https://lottie.host/5313703a-ea9e-44da-9e38-72f
 lottie_ai = load_lottie_url("https://lottie.host/a3d2629a-7bcc-41b7-b991-cc937fd8d896/gtko6LcxIh.json")
 
 # ========= DB Connection =========
+
+
 def connect_db():
     return psycopg2.connect(
-        host="aws-0-eu-west-3.pooler.supabase.com",
-        dbname="postgres",
-        user="postgres.urqzsanhvlahtsjjbrot",
-        password="YodaAi2002",
-        port=5432
+        host=os.getenv("DB_HOST"),
+        port=os.getenv("DB_PORT"),
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD")
     )
+
 
 # ========= Face Detection =========
 def detect_faces(image):
