@@ -172,28 +172,41 @@ with tabs[1]:
         st_lottie(lottie_search, height=250, key="search_anim")
 
 # ========= Gallery =========
+# ========= Gallery =========
 with tabs[2]:
     st.subheader("🖼️ Stored Gallery")
-    files = os.listdir("stored-faces")
-    if files:
-        conn = connect_db()
-        cur = conn.cursor()
+
+    conn = connect_db()
+    cur = conn.cursor()
+
+    # 1. قراءة أسماء الصور من قاعدة البيانات
+    cur.execute("SELECT picture FROM pictures ORDER BY id DESC")
+    results = cur.fetchall()
+    conn.close()
+
+    if results:
         cols = st.columns(4)
-        for i, file in enumerate(files):
+        for i, row in enumerate(results):
+            file = row[0]
+            path = os.path.join("stored-faces", file)
             with cols[i % 4]:
-                path = os.path.join("stored-faces", file)
-                st.image(path, caption=file, use_container_width=True)
-                if st.button("🗑️ Delete", key=f"del_{file}"):
-                    cur.execute("DELETE FROM pictures WHERE picture = %s", (file,))
-                    conn.commit()
-                    os.remove(path)
-                    st.rerun()
-        conn.close()
+                if os.path.exists(path):
+                    st.image(path, caption=file, use_container_width=True)
+                    if st.button("🗑️ Delete", key=f"del_{file}"):
+                        conn = connect_db()
+                        cur = conn.cursor()
+                        cur.execute("DELETE FROM pictures WHERE picture = %s", (file,))
+                        conn.commit()
+                        conn.close()
+                        os.remove(path)
+                        st.rerun()
+                else:
+                    st.warning(f"❌ Missing file: {file}")
     else:
         st.info("📭 No faces saved.")
+    
     if lottie_gallery:
         st_lottie(lottie_gallery, height=250, key="gallery_anim")
-
 # ========= Report =========
 with tabs[3]:
     st.subheader("📊 Auto Summary")
