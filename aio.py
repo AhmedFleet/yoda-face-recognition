@@ -50,7 +50,7 @@ def detect_faces(image):
 # ========= Embedding =========
 def get_embedding(pil_image):
     pil_image = pil_image.resize((224, 224)).convert("RGB")
-    return model.encode([(pil_image, "a photo of a face")])
+    return model.encode([pil_image])[0]
 
 
 # ========= Smart Comments =========
