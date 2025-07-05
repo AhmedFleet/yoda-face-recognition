@@ -8,6 +8,7 @@ import os
 import random
 from streamlit_lottie import st_lottie
 import requests
+
 st.set_page_config(page_title="YODA | AI Face Recognition", layout="wide", page_icon="🧠")
 
 # ========= Load model =========
@@ -31,9 +32,7 @@ lottie_main = load_lottie_url("https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d
 lottie_upload = load_lottie_url("https://lottie.host/8b971041-2496-4886-8448-6af7b7fa87b3/6gQs13ZbJX.json")
 lottie_search = load_lottie_url("https://lottie.host/8f9e88fb-54a7-47ba-b8a3-3e705996091a/q93fq0vxOW.json")
 lottie_gallery = load_lottie_url("https://lottie.host/b8b4c947-d359-4de1-8ae2-cf0052a19728/c7AQ3zyNiy.json")
-lottie_report = load_lottie_url("https://lottie.host/5313703a-ea9e-44da-9e38-72f1d5e0a094/ROZ7VmTJ5W.json")
 lottie_ai = load_lottie_url("https://lottie.host/a3d2629a-7bcc-41b7-b991-cc937fd8d896/gtko6LcxIh.json")
-
 
 # ========= DB Connection =========
 def connect_db():
@@ -44,17 +43,6 @@ def connect_db():
         password="YodaAi2002",
         port=5432
     )
-
-#==============LocalDataBase==========
-#def connect_db():
- #   return psycopg2.connect(
-  #      host="localhost",
-   #     dbname="postgres",
-    #    user="postgres",
-     #   password="123",
-      #  port=5432
-   # )
-
 
 
 # ========= Face Detection =========
@@ -67,8 +55,7 @@ def detect_faces(image):
 # ========= Embedding =========
 def get_embedding(pil_image):
     pil_image = pil_image.resize((224, 224)).convert("RGB")
-    return model.encode([pil_image])[0]  # فقط الصورة
-
+    return model.encode([pil_image])[0]
 
 
 # ========= Smart Comments =========
@@ -91,9 +78,7 @@ def describe_face():
     ])
 
 
-# ========= Streamlit Setup =========
-#st.set_page_config(page_title="YODA | AI Face Recognition", layout="wide", page_icon="🧠")
-
+# ========= Styling =========
 st.markdown("""
 <style>
 body { background-color: #0d1117; color: white; }
@@ -109,20 +94,23 @@ body { background-color: #0d1117; color: white; }
 </style>
 """, unsafe_allow_html=True)
 
+
+# ========= UI =========
 st.title("🧠 YODA - AI Face Recognition Assistant")
 if lottie_main:
     st_lottie(lottie_main, speed=1, reverse=False, loop=True, quality="high", height=400, key="main_anim")
 
 tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "⚙️ AI Suggestions"])
 
-# ========= Upload =========
+
+# ========= Upload Tab =========
 with tabs[0]:
     st.subheader("Upload Image with Faces")
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
     if uploaded_file:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
-        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image", use_container_width=True)
         faces = detect_faces(img)
         st.info(f"✅ {len(faces)} face(s) detected.")
         if faces.any():
@@ -156,11 +144,12 @@ with tabs[0]:
                 for i, (path, name) in enumerate(new_faces):
                     col1, col2 = st.columns([1, 2])
                     col1.image(path, width=150)
-                    col2.write(f"**{name}**{descriptions[i][0]}{descriptions[i][1]}")
+                    col2.write(f"**{name}** {descriptions[i][0]} {descriptions[i][1]}")
     if lottie_upload:
         st_lottie(lottie_upload, height=350, key="upload_anim")
 
-# ========= Search =========
+
+# ========= Search Tab =========
 with tabs[1]:
     st.subheader("🔍 Upload a Face to Search")
     query_file = st.file_uploader("Choose face image...", type=["jpg", "jpeg", "png"], key="query")
@@ -187,17 +176,18 @@ with tabs[1]:
                 name, sim = result
                 percent = sim * 100
                 col1, col2 = st.columns(2)
-               with col1:
-                    col1.image(face_pil, caption="Query Face")
+                with col1:
+                    st.image(face_pil, caption="Query Face", use_container_width=True)
                 path = os.path.join("stored-faces", name)
-                col2.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)"
+                with col2:
+                    st.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)", use_container_width=True)
             else:
                 st.error("❌ No similar faces found.")
     if lottie_search:
         st_lottie(lottie_search, height=350, key="search_anim")
 
 
-# ========= Gallery =========
+# ========= Gallery Tab =========
 with tabs[2]:
     st.subheader("🖼️ Stored Gallery")
 
@@ -213,44 +203,35 @@ with tabs[2]:
         for i, row in enumerate(results):
             file = row[0]
             path = os.path.join("stored-faces", file)
-            
 
             with cols[i % 4]:
                 if os.path.exists(path):
                     st.image(path, caption=file, width=350)
-
-                    # زر الحذف الذي يفتح نافذة التأكيد
                     if st.button("🗑️ Delete", key=f"del_{file}"):
                         st.session_state["file_to_delete"] = file
-
                 else:
                     st.warning(f"❌ Missing file: {file}")
 
-        # نافذة التأكيد باستخدام modal
         if "file_to_delete" in st.session_state:
             file = st.session_state["file_to_delete"]
             path = os.path.join("stored-faces", file)
 
-            with st.modal(f"⚠️ Confirm Deletion for"):
+            with st.expander(f"⚠️ Confirm Deletion for {file}", expanded=True):
                 st.write("Are you sure you want to delete this face image?")
                 st.image(path, width=200)
 
                 col1, col2 = st.columns(2)
                 with col1:
                     if st.button("✅ Yes, Delete", key="confirm_delete"):
-                        # حذف من قاعدة البيانات
                         conn = connect_db()
                         cur = conn.cursor()
                         cur.execute("DELETE FROM pictures WHERE picture = %s", (file,))
                         conn.commit()
                         conn.close()
-
-                        # حذف من الملفات
                         try:
                             os.remove(path)
                         except FileNotFoundError:
                             pass
-
                         st.success(f"✅ Deleted: {file}")
                         del st.session_state["file_to_delete"]
                         st.experimental_rerun()
@@ -260,11 +241,11 @@ with tabs[2]:
                         del st.session_state["file_to_delete"]
     else:
         st.info("📭 No faces saved.")
-
     if lottie_gallery:
         st_lottie(lottie_gallery, height=350, key="gallery_anim")
 
-# ========= AI Suggestions =========
+
+# ========= AI Suggestions Tab =========
 with tabs[3]:
     st.subheader("⚙️ Smart AI Suggestions")
     files = os.listdir("stored-faces")
