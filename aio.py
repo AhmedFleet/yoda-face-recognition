@@ -103,7 +103,7 @@ with tabs[0]:
     # إعداد قيم الدقة الافتراضية وقيم الإعادة الأعلى
     if "face_scale" not in st.session_state:
         st.session_state.face_scale = 1.01
-        st.session_state.min_neighbors = 55
+        st.session_state.min_neighbors = 300
 
     if uploaded_file:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
