@@ -1,13 +1,7 @@
 streamlit
 opencv-python
+numpy
 Pillow
-torch==2.2.2
-torchvision==0.17.2
-sentence-transformers==2.2.2
-transformers==4.39.3
-huggingface_hub==0.14.1
-pgvector
+sentence-transformers
 psycopg2-binary
-requests
 streamlit-lottie
-
