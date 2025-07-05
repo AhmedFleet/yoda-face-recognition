@@ -13,7 +13,7 @@ st.set_page_config(page_title="YODA | AI Face Recognition", layout="wide", page_
 
 # ========= Load model =========
 model = SentenceTransformer("clip-ViT-B-32")
-model = model.to('cpu')
+
 
 
 # ========= Load Lottie Animations =========
