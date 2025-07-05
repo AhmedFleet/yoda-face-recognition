@@ -103,7 +103,7 @@ with tabs[0]:
     # إعداد قيم الدقة الافتراضية وقيم الإعادة الأعلى
     if "face_scale" not in st.session_state:
         st.session_state.face_scale = 1.01
-        st.session_state.min_neighbors = 70
+        st.session_state.min_neighbors = 55
 
     if uploaded_file:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
@@ -118,7 +118,7 @@ with tabs[0]:
                 gray,
                 scaleFactor=st.session_state.face_scale,
                 minNeighbors=st.session_state.min_neighbors,
-                minSize=(80, 80)
+                minSize=(75, 75)
             )
 
         faces = detect_faces_with_current_settings(img)
