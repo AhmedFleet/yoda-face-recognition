@@ -113,21 +113,53 @@ with tabs[0]:
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
         faces = detect_faces(img)
         st.info(f"✅ {len(faces)} face(s) detected.")
-        if faces.any():
-            conn = connect_db()
-            cur = conn.cursor()
-            os.makedirs("stored-faces", exist_ok=True)
-            new_faces = []
-            descriptions = []
-            for i, (x, y, w, h) in enumerate(faces):
-                face = img[y:y + h, x:x + w]
-                face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
-                embedding = get_embedding(face_pil)
-                vector_str = f"[{', '.join(map(str, embedding))}]"
-                cur.execute(
-                    "SELECT picture, 1 - (embedding <=> %s::vector) AS similarity FROM pictures ORDER BY embedding <=> %s::vector LIMIT 1",
-                    (vector_str, vector_str))
-                result = cur.fetchone()
+       if faces.any():
+    st.info(f"👁️ Detected {len(faces)} face(s). Do you want to review before saving?")
+    
+    # عرض الوجوه المكتشفة
+    face_pics = []
+    for i, (x, y, w, h) in enumerate(faces):
+        face = img[y:y + h, x:x + w]
+        face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
+        st.image(face_pil, caption=f"Detected Face {i+1}", width=150)
+        face_pics.append((face, face_pil))
+
+    if st.button("💾 Confirm & Save Faces"):
+        conn = connect_db()
+        cur = conn.cursor()
+        os.makedirs("stored-faces", exist_ok=True)
+        new_faces = []
+        descriptions = []
+
+        for i, (face, face_pil) in enumerate(face_pics):
+            embedding = get_embedding(face_pil)
+            vector_str = f"[{', '.join(map(str, embedding))}]"
+            cur.execute(
+                "SELECT picture, 1 - (embedding <=> %s::vector) AS similarity FROM pictures ORDER BY embedding <=> %s::vector LIMIT 1",
+                (vector_str, vector_str))
+            result = cur.fetchone()
+            if result and result[1] >= 0.95:
+                st.warning(f"⚠️ Face {i + 1} is a duplicate ({result[1] * 100:.2f}%)")
+                continue
+            filename = f"{i}_{os.urandom(4).hex()}.jpg"
+            path = os.path.join("stored-faces", filename)
+            cv2.imwrite(path, face)
+            new_faces.append((path, filename))
+            cur.execute("INSERT INTO pictures (picture, embedding) VALUES (%s, %s)", (filename, embedding.tolist()))
+            descriptions.append((generate_comment(), describe_face()))
+
+        conn.commit()
+        conn.close()
+
+        if new_faces:
+            st.markdown("### ✅ Saved Faces:")
+            for i, (path, name) in enumerate(new_faces):
+                col1, col2 = st.columns([1, 2])
+                col1.image(path, width=150)
+                col2.write(f"**{name}** {descriptions[i][0]} {descriptions[i][1]}")
+    else:
+        st.warning("⏳ Waiting for confirmation to save...")
+
                 if result and result[1] >= 0.95:
                     st.warning(f"⚠️ Face {i + 1} is a duplicate ({result[1] * 100:.2f}%)")
                     continue
