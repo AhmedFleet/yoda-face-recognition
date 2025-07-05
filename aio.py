@@ -14,8 +14,6 @@ st.set_page_config(page_title="YODA | AI Face Recognition", layout="wide", page_
 # ========= Load model =========
 model = SentenceTransformer("clip-ViT-B-32")
 
-
-
 # ========= Load Lottie Animations =========
 @st.cache_data
 def load_lottie_url(url):
@@ -26,7 +24,6 @@ def load_lottie_url(url):
         return r.json()
     except:
         return None
-
 
 lottie_main = load_lottie_url("https://lottie.host/ec68d393-eeb2-492d-b3fb-21b1d7dd89aa/fOXlmZgP47.json")
 lottie_upload = load_lottie_url("https://lottie.host/8b971041-2496-4886-8448-6af7b7fa87b3/6gQs13ZbJX.json")
@@ -44,19 +41,16 @@ def connect_db():
         port=5432
     )
 
-
 # ========= Face Detection =========
 def detect_faces(image):
     haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     return haar.detectMultiScale(gray, 1.01, 70, minSize=(80, 80))
 
-
 # ========= Embedding =========
 def get_embedding(pil_image):
     pil_image = pil_image.resize((224, 224)).convert("RGB")
     return model.encode([pil_image])[0]
-
 
 # ========= Smart Comments =========
 def generate_comment():
@@ -68,7 +62,6 @@ def generate_comment():
         "🧐 Calm and observant."
     ])
 
-
 def describe_face():
     return random.choice([
         "👩 Female | 🕐 20-30 | 🙂 Calm",
@@ -76,7 +69,6 @@ def describe_face():
         "👦 Teenager | 🕐 13-19 | 😀 Happy",
         "🧔 Adult | 🕐 40+ | 😎 Confident"
     ])
-
 
 # ========= Styling =========
 st.markdown("""
@@ -94,7 +86,6 @@ body { background-color: #0d1117; color: white; }
 </style>
 """, unsafe_allow_html=True)
 
-
 # ========= UI =========
 st.title("🧠 YODA - AI Face Recognition Assistant")
 if lottie_main:
@@ -102,29 +93,28 @@ if lottie_main:
 
 tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "⚙️ AI Suggestions"])
 
-
 # ========= Upload Tab =========
 with tabs[0]:
     st.subheader("Upload Image with Faces")
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    face_pics = []
+
     if uploaded_file:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
         faces = detect_faces(img)
-        st.info(f"✅ {len(faces)} face(s) detected.")
-       if faces.any():
-           st.info(f"👁️ Detected {len(faces)} face(s). Do you want to review before saving?")
-    
-    # عرض الوجوه المكتشفة
-    face_pics = []
-    for i, (x, y, w, h) in enumerate(faces):
-        face = img[y:y + h, x:x + w]
-        face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
-        st.image(face_pil, caption=f"Detected Face {i+1}", width=150)
-        face_pics.append((face, face_pil))
+        if len(faces) == 0:
+            st.warning("😢 No faces detected.")
+        else:
+            st.info(f"👁️ Detected {len(faces)} face(s). Review before saving.")
+            for i, (x, y, w, h) in enumerate(faces):
+                face = img[y:y + h, x:x + w]
+                face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
+                st.image(face_pil, caption=f"Detected Face {i + 1}", width=150)
+                face_pics.append((face, face_pil))
 
-    if st.button("💾 Confirm & Save Faces"):
+    if face_pics and st.button("💾 Confirm & Save Faces"):
         conn = connect_db()
         cur = conn.cursor()
         os.makedirs("stored-faces", exist_ok=True)
@@ -144,8 +134,8 @@ with tabs[0]:
             filename = f"{i}_{os.urandom(4).hex()}.jpg"
             path = os.path.join("stored-faces", filename)
             cv2.imwrite(path, face)
-            new_faces.append((path, filename))
             cur.execute("INSERT INTO pictures (picture, embedding) VALUES (%s, %s)", (filename, embedding.tolist()))
+            new_faces.append((path, filename))
             descriptions.append((generate_comment(), describe_face()))
 
         conn.commit()
@@ -157,29 +147,11 @@ with tabs[0]:
                 col1, col2 = st.columns([1, 2])
                 col1.image(path, width=150)
                 col2.write(f"**{name}** {descriptions[i][0]} {descriptions[i][1]}")
-    else:
-        st.warning("⏳ Waiting for confirmation to save...")
+    elif face_pics:
+        st.warning("⏳ Waiting for your confirmation to save...")
 
-                if result and result[1] >= 0.95:
-                    st.warning(f"⚠️ Face {i + 1} is a duplicate ({result[1] * 100:.2f}%)")
-                    continue
-                filename = f"{i}_{os.urandom(4).hex()}.jpg"
-                path = os.path.join("stored-faces", filename)
-                cv2.imwrite(path, face)
-                new_faces.append((path, filename))
-                cur.execute("INSERT INTO pictures (picture, embedding) VALUES (%s, %s)", (filename, embedding.tolist()))
-                descriptions.append((generate_comment(), describe_face()))
-            conn.commit()
-            conn.close()
-            if new_faces:
-                st.markdown("### ✅ Recently Saved:")
-                for i, (path, name) in enumerate(new_faces):
-                    col1, col2 = st.columns([1, 2])
-                    col1.image(path, width=150)
-                    col2.write(f"**{name}** {descriptions[i][0]} {descriptions[i][1]}")
     if lottie_upload:
         st_lottie(lottie_upload, height=350, key="upload_anim")
-
 
 # ========= Search Tab =========
 with tabs[1]:
