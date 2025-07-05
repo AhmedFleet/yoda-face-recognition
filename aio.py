@@ -110,7 +110,7 @@ with tabs[0]:
     if uploaded_file:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
-        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image", use_container_width=True)
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
         faces = detect_faces(img)
         st.info(f"✅ {len(faces)} face(s) detected.")
         if faces.any():
@@ -177,10 +177,10 @@ with tabs[1]:
                 percent = sim * 100
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.image(face_pil, caption="Query Face", use_container_width=True)
+                    st.image(face_pil, caption="Query Face")
                 path = os.path.join("stored-faces", name)
                 with col2:
-                    st.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)", use_container_width=True)
+                    st.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)")
             else:
                 st.error("❌ No similar faces found.")
     if lottie_search:
