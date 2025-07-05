@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# تثبيت مكتبات النظام التي يحتاجها OpenCV و sentence-transformers و git
+# تثبيت git و OpenCV dependencies
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
@@ -10,10 +10,10 @@ RUN apt-get update && apt-get install -y \
 # تعيين مجلد العمل
 WORKDIR /app
 
-# نسخ المشروع إلى داخل الحاوية
+# نسخ كل المشروع إلى داخل الحاوية
 COPY . /app
 
-# تحديث pip وتثبيت المتطلبات
+# تحديث pip وتثبيت المكتبات
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
