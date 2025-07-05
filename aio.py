@@ -98,12 +98,31 @@ with tabs[0]:
     st.subheader("Upload Image with Faces")
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
     face_pics = []
+    faces = []
+
+    # إعداد قيم الدقة الافتراضية وقيم الإعادة الأعلى
+    if "face_scale" not in st.session_state:
+        st.session_state.face_scale = 1.01
+        st.session_state.min_neighbors = 70
 
     if uploaded_file:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
-        faces = detect_faces(img)
+
+        # دالة مخصصة للكشف بالدقة الحالية
+        def detect_faces_with_current_settings(image):
+            haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            return haar.detectMultiScale(
+                gray,
+                scaleFactor=st.session_state.face_scale,
+                minNeighbors=st.session_state.min_neighbors,
+                minSize=(80, 80)
+            )
+
+        faces = detect_faces_with_current_settings(img)
+
         if len(faces) == 0:
             st.warning("😢 No faces detected.")
         else:
@@ -114,41 +133,54 @@ with tabs[0]:
                 st.image(face_pil, caption=f"Detected Face {i + 1}", width=150)
                 face_pics.append((face, face_pil))
 
-    if face_pics and st.button("💾 Confirm & Save Faces"):
-        conn = connect_db()
-        cur = conn.cursor()
-        os.makedirs("stored-faces", exist_ok=True)
-        new_faces = []
-        descriptions = []
+    # خيارات ما بعد الكشف
+    if face_pics:
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("✅ Confirm & Save Faces"):
+                conn = connect_db()
+                cur = conn.cursor()
+                os.makedirs("stored-faces", exist_ok=True)
+                new_faces = []
+                descriptions = []
 
-        for i, (face, face_pil) in enumerate(face_pics):
-            embedding = get_embedding(face_pil)
-            vector_str = f"[{', '.join(map(str, embedding))}]"
-            cur.execute(
-                "SELECT picture, 1 - (embedding <=> %s::vector) AS similarity FROM pictures ORDER BY embedding <=> %s::vector LIMIT 1",
-                (vector_str, vector_str))
-            result = cur.fetchone()
-            if result and result[1] >= 0.95:
-                st.warning(f"⚠️ Face {i + 1} is a duplicate ({result[1] * 100:.2f}%)")
-                continue
-            filename = f"{i}_{os.urandom(4).hex()}.jpg"
-            path = os.path.join("stored-faces", filename)
-            cv2.imwrite(path, face)
-            cur.execute("INSERT INTO pictures (picture, embedding) VALUES (%s, %s)", (filename, embedding.tolist()))
-            new_faces.append((path, filename))
-            descriptions.append((generate_comment(), describe_face()))
+                for i, (face, face_pil) in enumerate(face_pics):
+                    embedding = get_embedding(face_pil)
+                    vector_str = f"[{', '.join(map(str, embedding))}]"
+                    cur.execute(
+                        "SELECT picture, 1 - (embedding <=> %s::vector) AS similarity FROM pictures ORDER BY embedding <=> %s::vector LIMIT 1",
+                        (vector_str, vector_str))
+                    result = cur.fetchone()
+                    if result and result[1] >= 0.95:
+                        st.warning(f"⚠️ Face {i + 1} is a duplicate ({result[1] * 100:.2f}%)")
+                        continue
+                    filename = f"{i}_{os.urandom(4).hex()}.jpg"
+                    path = os.path.join("stored-faces", filename)
+                    cv2.imwrite(path, face)
+                    cur.execute("INSERT INTO pictures (picture, embedding) VALUES (%s, %s)", (filename, embedding.tolist()))
+                    new_faces.append((path, filename))
+                    descriptions.append((generate_comment(), describe_face()))
 
-        conn.commit()
-        conn.close()
+                conn.commit()
+                conn.close()
 
-        if new_faces:
-            st.markdown("### ✅ Saved Faces:")
-            for i, (path, name) in enumerate(new_faces):
-                col1, col2 = st.columns([1, 2])
-                col1.image(path, width=150)
-                col2.write(f"**{name}** {descriptions[i][0]} {descriptions[i][1]}")
-    elif face_pics:
-        st.warning("⏳ Waiting for your confirmation to save...")
+                if new_faces:
+                    st.markdown("### ✅ Saved Faces:")
+                    for i, (path, name) in enumerate(new_faces):
+                        col1, col2 = st.columns([1, 2])
+                        col1.image(path, width=150)
+                        col2.write(f"**{name}** {descriptions[i][0]} {descriptions[i][1]}")
+
+        with col2:
+            if st.button("🔁 Retry with Higher Accuracy"):
+                # تحديث إعدادات الكشف لجعلها أكثر دقة
+                st.session_state.face_scale = 1.005  # تقليل scaleFactor يزيد الدقة
+                st.session_state.min_neighbors = max(20, st.session_state.min_neighbors - 10)
+                st.warning("🔎 Retrying face detection with improved accuracy...")
+                st.experimental_rerun()
+
+    if uploaded_file and not face_pics:
+        st.info("⬆️ Upload an image and faces will be displayed for review.")
 
     if lottie_upload:
         st_lottie(lottie_upload, height=350, key="upload_anim")
