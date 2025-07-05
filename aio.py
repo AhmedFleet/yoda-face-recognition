@@ -122,7 +122,7 @@ with tabs[0]:
     if uploaded_file:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
-        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image", use_container_width=True)
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
         faces = detect_faces(img)
         st.info(f"✅ {len(faces)} face(s) detected.")
         if faces.any():
