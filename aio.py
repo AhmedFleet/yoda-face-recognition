@@ -230,7 +230,7 @@ with tabs[2]:
             file = st.session_state["file_to_delete"]
             path = os.path.join("stored-faces", file)
 
-            with st.modal(f"⚠️ Confirm Deletion for {file}"):
+            with st.modal(f"⚠️ Confirm Deletion for"):
                 st.write("Are you sure you want to delete this face image?")
                 st.image(path, width=200)
 
