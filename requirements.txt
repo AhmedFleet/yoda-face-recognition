@@ -5,3 +5,4 @@ Pillow
 sentence-transformers
 psycopg2-binary
 streamlit-lottie
+streamlit==1.35.0
