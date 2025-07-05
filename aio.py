@@ -114,7 +114,7 @@ with tabs[0]:
         faces = detect_faces(img)
         st.info(f"✅ {len(faces)} face(s) detected.")
        if faces.any():
-    st.info(f"👁️ Detected {len(faces)} face(s). Do you want to review before saving?")
+           st.info(f"👁️ Detected {len(faces)} face(s). Do you want to review before saving?")
     
     # عرض الوجوه المكتشفة
     face_pics = []
