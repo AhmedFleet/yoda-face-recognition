@@ -187,7 +187,8 @@ with tabs[1]:
                 name, sim = result
                 percent = sim * 100
                 col1, col2 = st.columns(2)
-               col1.image(face_pil, caption="Query Face")
+               with col1:
+    col1.image(face_pil, caption="Query Face")
                 path = os.path.join("stored-faces", name)
                 col2.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)"
             else:
