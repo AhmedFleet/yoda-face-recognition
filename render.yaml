@@ -2,7 +2,7 @@ services:
   - type: web
     name: yoda-app
     env: python
-    buildCommand: PIP_NO_BUILD_ISOLATION=0 pip install -r requirements.txt
+    buildCommand: ./render-build.sh
     startCommand: streamlit run aio.py --server.port $PORT --server.enableCORS false
     envVars:
       - key: DB_HOST
