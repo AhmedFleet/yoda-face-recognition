@@ -13,7 +13,7 @@ import requests
 st.set_page_config(page_title="YODA | AI Face Recognition", layout="wide", page_icon="🧠")
 
 DEFAULT_FACE_SCALE = 1.01
-DEFAULT_MIN_NEIGHBORS = 100
+DEFAULT_MIN_NEIGHBORS = 200
 
 if "face_scale" not in st.session_state:
     st.session_state.face_scale = DEFAULT_FACE_SCALE
