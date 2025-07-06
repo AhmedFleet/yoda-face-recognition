@@ -45,7 +45,7 @@ def connect_db():
 def detect_faces(image):
     haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    return haar.detectMultiScale(gray, 1.01, 100, minSize=(80, 80))
+    return haar.detectMultiScale(gray, 1.01, 100, minSize=(60, 60))
 
 # ========= Embedding =========
 def get_embedding(pil_image):
@@ -118,7 +118,7 @@ with tabs[0]:
                 gray,
                 scaleFactor=st.session_state.face_scale,
                 minNeighbors=st.session_state.min_neighbors,
-                minSize=(75, 75)
+                minSize=(60, 60)
             )
 
         faces = detect_faces_with_current_settings(img)
