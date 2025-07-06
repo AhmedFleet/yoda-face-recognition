@@ -9,16 +9,21 @@ import random
 from streamlit_lottie import st_lottie
 import requests
 
+# ========== إعداد الواجهة ==========
 st.set_page_config(page_title="YODA | AI Face Recognition", layout="wide", page_icon="🧠")
 
-# ========= Defaults =========
 DEFAULT_FACE_SCALE = 1.01
 DEFAULT_MIN_NEIGHBORS = 100
 
-# ========= Load model =========
+if "face_scale" not in st.session_state:
+    st.session_state.face_scale = DEFAULT_FACE_SCALE
+if "min_neighbors" not in st.session_state:
+    st.session_state.min_neighbors = DEFAULT_MIN_NEIGHBORS
+
+# ========== تحميل النموذج ==========
 model = SentenceTransformer("clip-ViT-B-32")
 
-# ========= Load Lottie Animations =========
+# ========== تحميل الرسوم المتحركة ==========
 @st.cache_data
 def load_lottie_url(url):
     try:
@@ -35,7 +40,7 @@ lottie_search = load_lottie_url("https://lottie.host/8f9e88fb-54a7-47ba-b8a3-3e7
 lottie_gallery = load_lottie_url("https://lottie.host/b8b4c947-d359-4de1-8ae2-cf0052a19728/c7AQ3zyNiy.json")
 lottie_ai = load_lottie_url("https://lottie.host/a3d2629a-7bcc-41b7-b991-cc937fd8d896/gtko6LcxIh.json")
 
-# ========= DB Connection =========
+# ========== الاتصال بقاعدة البيانات ==========
 def connect_db():
     return psycopg2.connect(
         host="aws-0-eu-west-3.pooler.supabase.com",
@@ -45,12 +50,12 @@ def connect_db():
         port=5432
     )
 
-# ========= Embedding =========
+# ========== توليد تمثيل الصورة ==========
 def get_embedding(pil_image):
     pil_image = pil_image.resize((224, 224)).convert("RGB")
     return model.encode([pil_image])[0]
 
-# ========= Smart Comments =========
+# ========== توصيف وتعليق ==========
 def generate_comment():
     return random.choice([
         "🧠 Appears confident and focused.",
@@ -68,7 +73,7 @@ def describe_face():
         "🧔 Adult | 🕐 40+ | 😎 Confident"
     ])
 
-# ========= Styling =========
+# ========== تنسيق الواجهة ==========
 st.markdown("""
 <style>
 body { background-color: #0d1117; color: white; }
@@ -84,59 +89,56 @@ body { background-color: #0d1117; color: white; }
 </style>
 """, unsafe_allow_html=True)
 
-# ========= UI =========
+# ========== العنوان ==========
 st.title("🧠 YODA - AI Face Recognition Assistant")
 if lottie_main:
-    st_lottie(lottie_main, speed=1, reverse=False, loop=True, quality="high", height=400, key="main_anim")
+    st_lottie(lottie_main, height=350, key="main_lottie")
 
-st.subheader("📤 Upload Image with Faces")
+# ========== التبويبات ==========
+tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "⚙️ AI Suggestions"])
 
-# إعداد الحالة الافتراضية للدقة
-if "face_scale" not in st.session_state:
-    st.session_state.face_scale = DEFAULT_FACE_SCALE
-if "min_neighbors" not in st.session_state:
-    st.session_state.min_neighbors = DEFAULT_MIN_NEIGHBORS
+# ========== 📤 Upload & Save ==========
+with tabs[0]:
+    st.subheader("Upload and Store Faces")
+    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+    face_pics = []
 
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-face_pics = []
-faces = []
+    if uploaded_file:
+        # إعادة الإعدادات الأصلية عند تحميل صورة جديدة
+        st.session_state.face_scale = DEFAULT_FACE_SCALE
+        st.session_state.min_neighbors = DEFAULT_MIN_NEIGHBORS
 
-if uploaded_file:
-    # إعادة تعيين الدقة للقيم الأصلية عند رفع صورة جديدة
-    st.session_state.face_scale = DEFAULT_FACE_SCALE
-    st.session_state.min_neighbors = DEFAULT_MIN_NEIGHBORS
+        file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+        img = cv2.imdecode(file_bytes, 1)
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
 
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    img = cv2.imdecode(file_bytes, 1)
-    st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
+        def detect_faces_custom(image):
+            haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            return haar.detectMultiScale(
+                gray,
+                scaleFactor=st.session_state.face_scale,
+                minNeighbors=st.session_state.min_neighbors,
+                minSize=(60, 60)
+            )
 
-    def detect_faces_custom(image):
-        haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        return haar.detectMultiScale(
-            gray,
-            scaleFactor=st.session_state.face_scale,
-            minNeighbors=st.session_state.min_neighbors,
-            minSize=(60, 60)
-        )
+        faces = detect_faces_custom(img)
+        if len(faces) == 0:
+            st.warning("😢 No faces detected.")
+            if st.button("🔁 Retry with Higher Accuracy"):
+                st.session_state.face_scale = 1.005
+                st.session_state.min_neighbors = max(20, st.session_state.min_neighbors - 10)
+                st.experimental_rerun()
+        else:
+            st.success(f"✅ {len(faces)} face(s) detected.")
+            for i, (x, y, w, h) in enumerate(faces):
+                face = img[y:y + h, x:x + w]
+                face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
+                st.image(face_pil, caption=f"Face {i + 1}", width=150)
+                face_pics.append((face, face_pil))
 
-    faces = detect_faces_custom(img)
-
-    if len(faces) == 0:
-        st.warning("😢 No faces detected.")
-    else:
-        st.info(f"👁️ Detected {len(faces)} face(s). Review before saving.")
-        for i, (x, y, w, h) in enumerate(faces):
-            face = img[y:y + h, x:x + w]
-            face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
-            st.image(face_pil, caption=f"Detected Face {i + 1}", width=150)
-            face_pics.append((face, face_pil))
-
-# ======= خيارات المستخدم بعد الكشف =======
-if face_pics:
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("✅ Confirm & Save Faces"):
+    if face_pics:
+        if st.button("💾 Confirm & Save Faces"):
             conn = connect_db()
             cur = conn.cursor()
             os.makedirs("stored-faces", exist_ok=True)
@@ -157,60 +159,9 @@ if face_pics:
                 st.success(f"✅ Saved: {filename} - {generate_comment()} - {describe_face()}")
             conn.commit()
             conn.close()
-            st.session_state.face_scale = DEFAULT_FACE_SCALE
-            st.session_state.min_neighbors = DEFAULT_MIN_NEIGHBORS
-            st.experimental_rerun()
 
-    with col2:
-        if st.button("🔁 Retry with Higher Accuracy"):
-            st.session_state.face_scale = 1.005
-            st.session_state.min_neighbors = max(20, st.session_state.min_neighbors - 10)
-            st.warning("🔎 Retrying with higher accuracy...")
-            st.experimental_rerun()
-
-if uploaded_file and not face_pics:
-    st.info("⬆️ Upload an image and faces will be displayed for review.")
-
-if lottie_upload:
-    st_lottie(lottie_upload, height=350, key="upload_anim")
-
-# ========= Search Tab =========
-with tabs[1]:
-    st.subheader("🔍 Upload a Face to Search")
-    query_file = st.file_uploader("Choose face image...", type=["jpg", "jpeg", "png"], key="query")
-    if query_file:
-        file_bytes = np.asarray(bytearray(query_file.read()), dtype=np.uint8)
-        img = cv2.imdecode(file_bytes, 1)
-        faces = detect_faces(img)
-        if not faces.any():
-            st.error("😢 No face detected.")
-        else:
-            (x, y, w, h) = faces[0]
-            face = img[y:y + h, x:x + w]
-            face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
-            embedding = get_embedding(face_pil)
-            vector_str = f"[{', '.join(map(str, embedding))}]"
-            conn = connect_db()
-            cur = conn.cursor()
-            cur.execute(
-                "SELECT picture, 1 - (embedding <=> %s::vector) AS similarity FROM pictures ORDER BY embedding <=> %s::vector LIMIT 1",
-                (vector_str, vector_str))
-            result = cur.fetchone()
-            conn.close()
-            if result:
-                name, sim = result
-                percent = sim * 100
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.image(face_pil, caption="Query Face")
-                path = os.path.join("stored-faces", name)
-                with col2:
-                    st.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)")
-            else:
-                st.error("❌ No similar faces found.")
-    if lottie_search:
-        st_lottie(lottie_search, height=350, key="search_anim")
-
+    if lottie_upload:
+        st_lottie(lottie_upload, height=300, key="upload_anim")
 
 # ========= Gallery Tab =========
 with tabs[2]:
