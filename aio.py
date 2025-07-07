@@ -39,6 +39,7 @@ lottie_upload = load_lottie_url("https://lottie.host/8b971041-2496-4886-8448-6af
 lottie_search = load_lottie_url("https://lottie.host/8f9e88fb-54a7-47ba-b8a3-3e705996091a/q93fq0vxOW.json")
 lottie_gallery = load_lottie_url("https://lottie.host/b8b4c947-d359-4de1-8ae2-cf0052a19728/c7AQ3zyNiy.json")
 lottie_ai = load_lottie_url("https://lottie.host/a3d2629a-7bcc-41b7-b991-cc937fd8d896/gtko6LcxIh.json")
+lottie_Setting = load_lottie_url("https://lottie.host/a931d3a3-a07c-4447-8f1f-8418c35d3118/Sqvmv26Bkw.json")
 
 # ========== الاتصال بقاعدة البيانات ==========
 def connect_db():
@@ -253,4 +254,6 @@ with tabs[4]:
     if st.button("💾 حفظ الإعدادات"):
         st.session_state.min_neighbors = temp_neighbors
         st.success("✅ تم حفظ الإعدادات الجديدة بنجاح.")
+        if lottie_Setting:
+            st_lottie(lottie_Setting, height=450, key="Setting_lottie")
 
