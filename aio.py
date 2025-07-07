@@ -254,6 +254,6 @@ with tabs[4]:
     if st.button("💾 حفظ الإعدادات"):
         st.session_state.min_neighbors = temp_neighbors
         st.success("✅ تم حفظ الإعدادات الجديدة بنجاح.")
-        if lottie_Setting:
-            st_lottie(lottie_Setting, height=450, key="Setting_lottie")
+   if lottie_Setting:
+       st_lottie(lottie_Setting, height=450, key="Setting_lottie")
 
