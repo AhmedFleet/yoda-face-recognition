@@ -93,7 +93,7 @@ body { background-color: #0d1117; color: white; }
 # ========== العنوان ==========
 st.title("🧠 YODA - AI Face Recognition Assistant")
 if lottie_main:
-    st_lottie(lottie_main, height=350, key="main_lottie")
+    st_lottie(lottie_main, height=450, key="main_lottie")
 
 # ========== التبويبات ==========
 tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "🤖 AI Suggestions", "⚙️ Settings"])
@@ -163,7 +163,7 @@ with tabs[0]:
             conn.close()
 
     if lottie_upload:
-        st_lottie(lottie_upload, height=300, key="upload_anim")
+        st_lottie(lottie_upload, height=400, key="upload_anim")
 
 # ========= Gallery Tab =========
 with tabs[2]:
@@ -220,7 +220,7 @@ with tabs[2]:
     else:
         st.info("📭 No faces saved.")
     if lottie_gallery:
-        st_lottie(lottie_gallery, height=350, key="gallery_anim")
+        st_lottie(lottie_gallery, height=450, key="gallery_anim")
 
 
 # ========= AI Suggestions Tab =========
@@ -234,7 +234,7 @@ with tabs[3]:
     st.markdown("- 📌 Use clear face images for better detection.")
     st.markdown("- 🧩 Adjust detection sensitivity if needed.")
     if lottie_ai:
-        st_lottie(lottie_ai, height=350, key="ai_anim")
+        st_lottie(lottie_ai, height=450, key="ai_anim")
 
 
 # ========= Settings Tab =========
@@ -255,5 +255,5 @@ with tabs[4]:
         st.session_state.min_neighbors = temp_neighbors
         st.success("✅ تم حفظ الإعدادات الجديدة بنجاح.")
    if lottie_Setting:
-       st_lottie(lottie_Setting, height=450, key="Setting_lottie")
+        st_lottie(lottie_Setting, height=450, key="Setting_lottie")
 
