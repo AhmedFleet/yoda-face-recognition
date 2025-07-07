@@ -95,7 +95,7 @@ if lottie_main:
     st_lottie(lottie_main, height=350, key="main_lottie")
 
 # ========== التبويبات ==========
-with st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "🤖 AI Suggestions", "⚙️ Settings"]):
+tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "🤖 AI Suggestions", "⚙️ Settings"])
 
 # ========== 📤 Upload & Save ==========
 with tabs[0]:
@@ -237,11 +237,10 @@ with tabs[3]:
 
 
 # ========= Settings Tab =========
-with st.tabs([4]):
+with tabs[4]:  # لأن الترتيب يبدأ من 0
     st.subheader("⚙️ Detection Settings")
 
     st.write("### Adjust Face Detection Sensitivity")
     st.slider("Scale Factor", min_value=1.01, max_value=1.5, step=0.01, key="face_scale")
     st.slider("Min Neighbors", min_value=1, max_value=300, step=1, key="min_neighbors")
-    st.success("🔧 Changes will apply on the next face detection.")
-
+    st.success("🔧 These values will be used in the next detection.")
