@@ -95,7 +95,7 @@ if lottie_main:
     st_lottie(lottie_main, height=350, key="main_lottie")
 
 # ========== التبويبات ==========
-tabs = st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "⚙️ AI Suggestions"])
+with st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "🤖 AI Suggestions", "⚙️ Settings"])
 
 # ========== 📤 Upload & Save ==========
 with tabs[0]:
@@ -104,10 +104,6 @@ with tabs[0]:
     face_pics = []
 
     if uploaded_file:
-        # إعادة الإعدادات الأصلية عند تحميل صورة جديدة
-        st.session_state.face_scale = DEFAULT_FACE_SCALE
-        st.session_state.min_neighbors = DEFAULT_MIN_NEIGHBORS
-
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
@@ -126,27 +122,24 @@ with tabs[0]:
 
         if len(faces) == 0:
             st.warning("😢 No faces detected.")
-        if st.button("🔁 Retry with Higher Accuracy"):
+        elif len(faces) < 3:
+            st.info(f"🤔 Only {len(faces)} face(s) detected. You may want to retry with higher accuracy.")
+        else:
+            st.success(f"✅ {len(faces)} face(s) detected.")
+
+        # زر دائم لإعادة المحاولة
+        if st.button("🔁 Retry Face Detection"):
             st.session_state.face_scale = 1.005
             st.session_state.min_neighbors = max(20, st.session_state.min_neighbors - 10)
             st.experimental_rerun()
-        else:
-            st.success(f"✅ {len(faces)} face(s) detected.")
-            for i, (x, y, w, h) in enumerate(faces):
-                face = img[y:y + h, x:x + w]
-                face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
-                st.image(face_pil, caption=f"Face {i + 1}", width=150)
-                face_pics.append((face, face_pil))
 
-            if len(faces) < 2:
-                st.info("🤔 Not all faces might have been detected. Try improving accuracy?")
-                if st.button("🔍 Try to Detect More Faces"):
-                    st.session_state.face_scale = 1.005
-                    st.session_state.min_neighbors = max(20, st.session_state.min_neighbors - 10)
-                    st.experimental_rerun()
+        for i, (x, y, w, h) in enumerate(faces):
+            face = img[y:y + h, x:x + w]
+            face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
+            st.image(face_pil, caption=f"Face {i + 1}", width=150)
+            face_pics.append((face, face_pil))
 
-    if face_pics:
-        if st.button("💾 Confirm & Save Faces"):
+        if face_pics and st.button("💾 Confirm & Save Faces"):
             conn = connect_db()
             cur = conn.cursor()
             os.makedirs("stored-faces", exist_ok=True)
@@ -170,7 +163,6 @@ with tabs[0]:
 
     if lottie_upload:
         st_lottie(lottie_upload, height=300, key="upload_anim")
-
 
 # ========= Gallery Tab =========
 with tabs[2]:
@@ -242,3 +234,14 @@ with tabs[3]:
     st.markdown("- 🧩 Adjust detection sensitivity if needed.")
     if lottie_ai:
         st_lottie(lottie_ai, height=350, key="ai_anim")
+
+
+# ========= Settings Tab =========
+with st.tabs([4]):
+    st.subheader("⚙️ Detection Settings")
+
+    st.write("### Adjust Face Detection Sensitivity")
+    st.slider("Scale Factor", min_value=1.01, max_value=1.5, step=0.01, key="face_scale")
+    st.slider("Min Neighbors", min_value=1, max_value=300, step=1, key="min_neighbors")
+    st.success("🔧 Changes will apply on the next face detection.")
+
