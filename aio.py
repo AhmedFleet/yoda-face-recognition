@@ -127,9 +127,9 @@ with tabs[0]:
         if len(faces) == 0:
             st.warning("😢 No faces detected.")
         if st.button("🔁 Retry with Higher Accuracy"):
-           st.session_state.face_scale = 1.005
-           st.session_state.min_neighbors = max(20, st.session_state.min_neighbors - 10)
-           st.experimental_rerun()
+            st.session_state.face_scale = 1.005
+            st.session_state.min_neighbors = max(20, st.session_state.min_neighbors - 10)
+            st.experimental_rerun()
         else:
             st.success(f"✅ {len(faces)} face(s) detected.")
             for i, (x, y, w, h) in enumerate(faces):
