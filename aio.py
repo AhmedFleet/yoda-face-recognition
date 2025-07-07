@@ -237,10 +237,17 @@ with tabs[3]:
 
 
 # ========= Settings Tab =========
-with tabs[4]:  # لأن الترتيب يبدأ من 0
-    st.subheader("⚙️ Detection Settings")
+with tabs[4]:
+    st.subheader("⚙️ Settings")
 
-    st.write("### Adjust Face Detection Sensitivity")
-    st.slider("Scale Factor", min_value=1.01, max_value=1.5, step=0.01, key="face_scale")
-    st.slider("Min Neighbors", min_value=1, max_value=300, step=1, key="min_neighbors")
-    st.success("🔧 These values will be used in the next detection.")
+    st.markdown("قم بضبط إعدادات دقة كشف الوجوه حسب احتياجك. لن يتم تطبيق التغييرات إلا بعد الضغط على زر الحفظ.")
+
+    # إدخال مؤقت لقيم الإعدادات
+    temp_scale = st.number_input("🔍 Scale Factor (الدقة)", min_value=1.005, max_value=2.0, step=0.005, value=st.session_state.face_scale, format="%.3f")
+    temp_neighbors = st.number_input("👥 Min Neighbors (عدد الجيران)", min_value=1, max_value=500, step=5, value=st.session_state.min_neighbors)
+
+    # زر الحفظ
+    if st.button("💾 حفظ الإعدادات"):
+        st.session_state.face_scale = temp_scale
+        st.session_state.min_neighbors = temp_neighbors
+        st.success("✅ تم حفظ الإعدادات بنجاح.")
