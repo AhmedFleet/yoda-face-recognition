@@ -240,14 +240,17 @@ with tabs[3]:
 with tabs[4]:
     st.subheader("⚙️ Settings")
 
-    st.markdown("قم بضبط إعدادات دقة كشف الوجوه حسب احتياجك. لن يتم تطبيق التغييرات إلا بعد الضغط على زر الحفظ.")
+    st.markdown("👥 قم بضبط عدد الجيران المستخدم في كشف الوجوه. القيم الأعلى = دقة أعلى ولكن أصعب في الكشف.")
 
-    # إدخال مؤقت لقيم الإعدادات
-    temp_scale = st.number_input("🔍 Scale Factor (الدقة)", min_value=1.005, max_value=2.0, step=0.005, value=st.session_state.face_scale, format="%.3f")
-    temp_neighbors = st.number_input("👥 Min Neighbors (عدد الجيران)", min_value=1, max_value=500, step=5, value=st.session_state.min_neighbors)
+    # إدخال مؤقت لقيمة min_neighbors فقط
+    temp_neighbors = st.number_input(
+        "👥 Min Neighbors (عدد الجيران)",
+        min_value=1, max_value=500, step=10,
+        value=st.session_state.min_neighbors
+    )
 
     # زر الحفظ
     if st.button("💾 حفظ الإعدادات"):
-        st.session_state.face_scale = temp_scale
         st.session_state.min_neighbors = temp_neighbors
-        st.success("✅ تم حفظ الإعدادات بنجاح.")
+        st.success("✅ تم حفظ الإعدادات الجديدة بنجاح.")
+
