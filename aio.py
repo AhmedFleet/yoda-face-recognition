@@ -95,7 +95,7 @@ if lottie_main:
     st_lottie(lottie_main, height=350, key="main_lottie")
 
 # ========== التبويبات ==========
-with st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "🤖 AI Suggestions", "⚙️ Settings"])
+with st.tabs(["📤 Upload & Save", "🔍 Search", "🖼️ Gallery", "🤖 AI Suggestions", "⚙️ Settings"]):
 
 # ========== 📤 Upload & Save ==========
 with tabs[0]:
