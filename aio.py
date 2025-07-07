@@ -123,6 +123,7 @@ with tabs[0]:
             )
 
         faces = detect_faces_custom(img)
+
         if len(faces) == 0:
             st.warning("😢 No faces detected.")
             if st.button("🔁 Retry with Higher Accuracy"):
@@ -136,6 +137,13 @@ with tabs[0]:
                 face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
                 st.image(face_pil, caption=f"Face {i + 1}", width=150)
                 face_pics.append((face, face_pil))
+
+            if len(faces) < 2:
+                st.info("🤔 Not all faces might have been detected. Try improving accuracy?")
+                if st.button("🔍 Try to Detect More Faces"):
+                    st.session_state.face_scale = 1.005
+                    st.session_state.min_neighbors = max(20, st.session_state.min_neighbors - 10)
+                    st.experimental_rerun()
 
     if face_pics:
         if st.button("💾 Confirm & Save Faces"):
@@ -162,6 +170,7 @@ with tabs[0]:
 
     if lottie_upload:
         st_lottie(lottie_upload, height=300, key="upload_anim")
+
 
 # ========= Gallery Tab =========
 with tabs[2]:
