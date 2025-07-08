@@ -175,7 +175,7 @@ with tabs[1]:
         img = cv2.imdecode(file_bytes, 1)
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="🔍 Query Image")
 
-        faces = detect_faces(img)
+        faces = detect_faces_custom(img)
         if len(faces) == 0:
             st.error("😢 No face detected.")
         else:
