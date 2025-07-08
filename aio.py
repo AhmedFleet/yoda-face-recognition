@@ -168,12 +168,15 @@ with tabs[0]:
 # ========= Search Tab =========
 with tabs[1]:
     st.subheader("🔍 Upload a Face to Search")
-    query_file = st.file_uploader("Choose face image...", type=["jpg", "jpeg", "png"], key="query")
+    query_file = st.file_uploader("Choose a face image to search", type=["jpg", "jpeg", "png"], key="query")
+
     if query_file:
         file_bytes = np.asarray(bytearray(query_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
+        st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="🔍 Query Image")
+
         faces = detect_faces(img)
-        if not faces.any():
+        if len(faces) == 0:
             st.error("😢 No face detected.")
         else:
             (x, y, w, h) = faces[0]
@@ -181,6 +184,7 @@ with tabs[1]:
             face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
             embedding = get_embedding(face_pil)
             vector_str = f"[{', '.join(map(str, embedding))}]"
+
             conn = connect_db()
             cur = conn.cursor()
             cur.execute(
@@ -188,17 +192,19 @@ with tabs[1]:
                 (vector_str, vector_str))
             result = cur.fetchone()
             conn.close()
+
             if result:
                 name, sim = result
                 percent = sim * 100
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.image(face_pil, caption="Query Face")
+                    st.image(face_pil, caption="🔍 Query Face")
                 path = os.path.join("stored-faces", name)
                 with col2:
-                    st.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)")
+                    st.image(Image.open(path), caption=f"🟢 Match: {name} ({percent:.2f}%)")
             else:
                 st.error("❌ No similar faces found.")
+
     if lottie_search:
         st_lottie(lottie_search, height=350, key="search_anim")
 
