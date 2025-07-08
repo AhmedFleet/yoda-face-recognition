@@ -74,6 +74,19 @@ def describe_face():
         "🧔 Adult | 🕐 40+ | 😎 Confident"
     ])
 
+
+# ========== دالة تعرف علي الوجه ==========
+ def detect_faces_custom(image):
+            haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            return haar.detectMultiScale(
+                gray,
+                scaleFactor=st.session_state.face_scale,
+                minNeighbors=st.session_state.min_neighbors,
+                minSize=(60, 60)
+            )
+
+
 # ========== تنسيق الواجهة ==========
 st.markdown("""
 <style>
@@ -108,16 +121,6 @@ with tabs[0]:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, 1)
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="📸 Uploaded Image")
-
-        def detect_faces_custom(image):
-            haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            return haar.detectMultiScale(
-                gray,
-                scaleFactor=st.session_state.face_scale,
-                minNeighbors=st.session_state.min_neighbors,
-                minSize=(60, 60)
-            )
 
         faces = detect_faces_custom(img)
 
