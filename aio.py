@@ -75,16 +75,16 @@ def describe_face():
     ])
 
 
-# ========== دالة تعرف علي الوجه ==========
- def detect_faces_custom(image):
-     haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-     return haar.detectMultiScale(
-         gray,
-         scaleFactor=st.session_state.face_scale,
-         minNeighbors=st.session_state.min_neighbors,
-         minSize=(60, 60)
-     )
+# ========== دالة كشف الوجوه ========== 
+def detect_faces_custom(image):
+    haar = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return haar.detectMultiScale(
+        gray,
+        scaleFactor=st.session_state.face_scale,
+        minNeighbors=st.session_state.min_neighbors,
+        minSize=(60, 60)
+    )
 
 
 # ========== تنسيق الواجهة ==========
