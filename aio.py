@@ -165,6 +165,44 @@ with tabs[0]:
     if lottie_upload:
         st_lottie(lottie_upload, height=400, key="upload_anim")
 
+# ========= Search Tab =========
+with tabs[1]:
+    st.subheader("🔍 Upload a Face to Search")
+    query_file = st.file_uploader("Choose face image...", type=["jpg", "jpeg", "png"], key="query")
+    if query_file:
+        file_bytes = np.asarray(bytearray(query_file.read()), dtype=np.uint8)
+        img = cv2.imdecode(file_bytes, 1)
+        faces = detect_faces(img)
+        if not faces.any():
+            st.error("😢 No face detected.")
+        else:
+            (x, y, w, h) = faces[0]
+            face = img[y:y + h, x:x + w]
+            face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
+            embedding = get_embedding(face_pil)
+            vector_str = f"[{', '.join(map(str, embedding))}]"
+            conn = connect_db()
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT picture, 1 - (embedding <=> %s::vector) AS similarity FROM pictures ORDER BY embedding <=> %s::vector LIMIT 1",
+                (vector_str, vector_str))
+            result = cur.fetchone()
+            conn.close()
+            if result:
+                name, sim = result
+                percent = sim * 100
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.image(face_pil, caption="Query Face")
+                path = os.path.join("stored-faces", name)
+                with col2:
+                    st.image(Image.open(path), caption=f"Match: {name} ({percent:.2f}%)")
+            else:
+                st.error("❌ No similar faces found.")
+    if lottie_search:
+        st_lottie(lottie_search, height=350, key="search_anim")
+
+
 # ========= Gallery Tab =========
 with tabs[2]:
     st.subheader("🖼️ Stored Gallery")
